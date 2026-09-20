@@ -1,0 +1,7 @@
+{
+  "name": "FinGuard AI",
+  "description": "GPU-Powered Financial Risk Intelligence — Real-Time Fraud Detection, 30/60/90-Day Cash Flow Forecasting, Business Risk Intelligence, AMD ROCm Acceleration & AI CFO.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
+
