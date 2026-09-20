@@ -37,13 +37,17 @@ export const Header: React.FC<HeaderProps> = ({
     <header className="sticky top-0 z-40 w-full border-b border-slate-800/80 bg-[#090d16]/90 backdrop-blur-md">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         {/* Brand & Identity */}
-        <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-500/20 via-blue-500/10 to-transparent border border-cyan-500/30 text-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.15)]">
+        <div 
+          onClick={() => setActiveTab('overview')} 
+          className="flex items-center gap-3 cursor-pointer group"
+          title="Return to Financial Risk Overview"
+        >
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-500/20 via-blue-500/10 to-transparent border border-cyan-500/30 text-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.15)] group-hover:border-cyan-400 transition-colors">
             <ShieldCheck className="h-6 w-6" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-lg font-bold tracking-tight text-white">
+              <span className="text-lg font-bold tracking-tight text-white group-hover:text-cyan-300 transition-colors">
                 FinGuard <span className="text-cyan-400">AI</span>
               </span>
               <span className="hidden sm:inline-flex items-center rounded-md bg-cyan-950/60 px-2 py-0.5 text-[10px] font-semibold text-cyan-300 border border-cyan-800/50">
@@ -87,7 +91,11 @@ export const Header: React.FC<HeaderProps> = ({
           </button>
 
           {/* Quick Health Indicator */}
-          <div className="hidden lg:flex items-center gap-2 rounded-full bg-slate-900/80 px-3 py-1 text-xs border border-slate-800 text-slate-300">
+          <div 
+            onClick={() => setActiveTab('overview')}
+            className="hidden lg:flex items-center gap-2 rounded-full bg-slate-900/80 px-3 py-1 text-xs border border-slate-800 text-slate-300 cursor-pointer hover:border-slate-700 hover:text-white transition-colors"
+            title="View financial health analytics"
+          >
             <Activity className="h-3.5 w-3.5 text-emerald-400" />
             <span>Health Score:</span>
             <span className="font-bold text-emerald-400">84/100</span>

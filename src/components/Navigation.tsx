@@ -69,7 +69,25 @@ export const Navigation: React.FC<NavigationProps> = ({
 
   return (
     <nav className="w-full border-b border-slate-800/80 bg-[#090d16]/70 px-4 sm:px-6 lg:px-8">
-      <div className="mx-auto flex max-w-7xl space-x-1 overflow-x-auto py-2.5 no-scrollbar">
+      {/* Mobile Selector Dropdown */}
+      <div className="sm:hidden py-2">
+        <label htmlFor="mobile-nav-select" className="sr-only">Select Feature View</label>
+        <select
+          id="mobile-nav-select"
+          value={activeTab}
+          onChange={(e) => setActiveTab(e.target.value)}
+          className="w-full rounded-xl border border-slate-700 bg-slate-900 py-2 px-3 text-xs font-semibold text-white focus:border-cyan-500 focus:outline-none"
+        >
+          {tabs.map((tab) => (
+            <option key={tab.id} value={tab.id}>
+              {tab.name} {tab.badge ? `(${tab.badge})` : ''}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {/* Desktop / Tablet Horizontal Tab Navigation */}
+      <div className="hidden sm:flex mx-auto max-w-7xl space-x-1 overflow-x-auto py-2.5 no-scrollbar">
         {tabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;

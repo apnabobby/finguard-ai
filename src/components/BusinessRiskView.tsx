@@ -10,7 +10,10 @@ import {
   PieChart as PieIcon,
   ShieldAlert,
   Percent,
-  TrendingDown
+  TrendingDown,
+  X,
+  FileText,
+  DollarSign
 } from 'lucide-react';
 import { BusinessRiskData, CustomerRiskItem, SupplierRiskItem } from '../types';
 
@@ -20,6 +23,8 @@ interface BusinessRiskViewProps {
 
 export const BusinessRiskView: React.FC<BusinessRiskViewProps> = ({ businessRisk }) => {
   const [activeTab, setActiveTab] = useState<'customers' | 'suppliers' | 'expenses'>('customers');
+  const [selectedCustomer, setSelectedCustomer] = useState<CustomerRiskItem | null>(null);
+  const [selectedSupplier, setSelectedSupplier] = useState<SupplierRiskItem | null>(null);
 
   if (!businessRisk) {
     return <div className="p-8 text-center text-slate-500">Loading risk intelligence...</div>;
@@ -197,13 +202,18 @@ export const BusinessRiskView: React.FC<BusinessRiskViewProps> = ({ businessRisk
                   <th className="py-3 px-4 font-semibold">Rating</th>
                   <th className="py-3 px-4 font-semibold">Risk Score</th>
                   <th className="py-3 px-4 font-semibold">Primary Risk Factor</th>
+                  <th className="py-3 px-4 font-semibold text-right">Dossier</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-800/60">
                 {customerConcentrationRisk.customers.map((cust) => (
-                  <tr key={cust.id} className="hover:bg-slate-800/40 transition-colors">
+                  <tr 
+                    key={cust.id} 
+                    onClick={() => setSelectedCustomer(cust)}
+                    className="hover:bg-slate-800/60 cursor-pointer transition-colors"
+                  >
                     <td className="py-3 px-4">
-                      <span className="font-bold text-white block">{cust.name}</span>
+                      <span className="font-bold text-white block hover:text-cyan-400 transition-colors">{cust.name}</span>
                       <span className="text-[10px] text-slate-500 font-medium">{cust.tier} Tier ({cust.id})</span>
                     </td>
 
@@ -243,6 +253,15 @@ export const BusinessRiskView: React.FC<BusinessRiskViewProps> = ({ businessRisk
                     <td className="py-3 px-4 text-slate-400 max-w-xs text-[11px]">
                       {cust.primaryRiskReason}
                     </td>
+
+                    <td className="py-3 px-4 text-right" onClick={(e) => e.stopPropagation()}>
+                      <button
+                        onClick={() => setSelectedCustomer(cust)}
+                        className="rounded bg-slate-800 hover:bg-slate-700 text-cyan-300 border border-slate-700 px-2.5 py-1 text-[11px] font-semibold transition-colors"
+                      >
+                        Inspect
+                      </button>
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -270,13 +289,18 @@ export const BusinessRiskView: React.FC<BusinessRiskViewProps> = ({ businessRisk
                   <th className="py-3 px-4 font-semibold">Switching Lag</th>
                   <th className="py-3 px-4 font-semibold">Risk Score</th>
                   <th className="py-3 px-4 font-semibold">Main Risk Factors</th>
+                  <th className="py-3 px-4 font-semibold text-right">Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-800/60">
                 {supplierDependencyRisk.suppliers.map((supp) => (
-                  <tr key={supp.id} className="hover:bg-slate-800/40 transition-colors">
+                  <tr 
+                    key={supp.id} 
+                    onClick={() => setSelectedSupplier(supp)}
+                    className="hover:bg-slate-800/60 cursor-pointer transition-colors"
+                  >
                     <td className="py-3 px-4">
-                      <span className="font-bold text-white block">{supp.name}</span>
+                      <span className="font-bold text-white block hover:text-rose-400 transition-colors">{supp.name}</span>
                       <span className="text-[10px] text-slate-500 font-medium">{supp.category}</span>
                     </td>
 
@@ -293,7 +317,7 @@ export const BusinessRiskView: React.FC<BusinessRiskViewProps> = ({ businessRisk
                         supp.criticality === 'Essential' 
                           ? 'bg-rose-950/80 text-rose-400 border border-rose-800/60' 
                           : supp.criticality === 'High' 
-                          ? 'bg-amber-950/80 text-amber-400 border border-amber-800/60'
+                          ? 'bg-amber-950/80 text-amber-400 border border-amber-800/60' 
                           : 'bg-slate-800 text-slate-300'
                       }`}>
                         {supp.criticality}
@@ -310,6 +334,15 @@ export const BusinessRiskView: React.FC<BusinessRiskViewProps> = ({ businessRisk
 
                     <td className="py-3 px-4 text-slate-400 text-[11px] max-w-sm">
                       {supp.riskFactors.join('; ')}
+                    </td>
+
+                    <td className="py-3 px-4 text-right" onClick={(e) => e.stopPropagation()}>
+                      <button
+                        onClick={() => setSelectedSupplier(supp)}
+                        className="rounded bg-slate-800 hover:bg-slate-700 text-rose-300 border border-slate-700 px-2.5 py-1 text-[11px] font-semibold transition-colors"
+                      >
+                        Failover Plan
+                      </button>
                     </td>
                   </tr>
                 ))}
@@ -369,6 +402,175 @@ export const BusinessRiskView: React.FC<BusinessRiskViewProps> = ({ businessRisk
                   <span className="text-slate-300">{alert}</span>
                 </div>
               ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Customer Risk Dossier Modal */}
+      {selectedCustomer && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+          <div className="w-full max-w-xl rounded-2xl border border-slate-700 bg-slate-900 p-6 shadow-2xl animate-in fade-in duration-200">
+            <div className="flex items-start justify-between border-b border-slate-800 pb-4">
+              <div>
+                <span className="text-[10px] font-bold text-cyan-400 uppercase tracking-wider">Account Dossier & Credit Intelligence</span>
+                <h3 className="text-lg font-bold text-white">{selectedCustomer.name}</h3>
+                <p className="text-xs text-slate-400">Account ID: {selectedCustomer.id} | Tier: {selectedCustomer.tier}</p>
+              </div>
+              <button
+                onClick={() => setSelectedCustomer(null)}
+                className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-800 hover:text-white"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <div className="mt-4 space-y-4 text-xs">
+              {/* Metric grid */}
+              <div className="grid grid-cols-3 gap-2.5">
+                <div className="p-3 rounded-xl bg-slate-950/60 border border-slate-800">
+                  <span className="text-[10px] text-slate-400 block">Monthly MRR</span>
+                  <span className="text-sm font-mono font-bold text-white">${selectedCustomer.mrr.toLocaleString()}</span>
+                </div>
+                <div className="p-3 rounded-xl bg-slate-950/60 border border-slate-800">
+                  <span className="text-[10px] text-slate-400 block">Company ARR Share</span>
+                  <span className="text-sm font-mono font-bold text-amber-400">{selectedCustomer.arrPercentage}%</span>
+                </div>
+                <div className="p-3 rounded-xl bg-slate-950/60 border border-slate-800">
+                  <span className="text-[10px] text-slate-400 block">Days Sales Outstanding</span>
+                  <span className={`text-sm font-mono font-bold ${selectedCustomer.dso > 50 ? 'text-rose-400' : 'text-emerald-400'}`}>
+                    {selectedCustomer.dso} Days
+                  </span>
+                </div>
+              </div>
+
+              {/* Status & Rating */}
+              <div className="p-3 rounded-xl bg-slate-950/60 border border-slate-800 flex items-center justify-between">
+                <div>
+                  <span className="text-[10px] text-slate-400 block">Current Payment Status</span>
+                  <div className="mt-1">{getStatusBadge(selectedCustomer.paymentStatus)}</div>
+                </div>
+                <div className="text-right">
+                  <span className="text-[10px] text-slate-400 block">Internal Credit Rating</span>
+                  <span className="text-sm font-bold font-mono text-slate-200">{selectedCustomer.creditRating}</span>
+                </div>
+                <div className="text-right">
+                  <span className="text-[10px] text-slate-400 block">Risk Score</span>
+                  <div className="mt-1">{getRiskScoreBadge(selectedCustomer.riskScore)}</div>
+                </div>
+              </div>
+
+              {/* Primary Risk Driver */}
+              <div className="p-3.5 rounded-xl bg-rose-950/20 border border-rose-900/50 text-rose-200">
+                <span className="text-[11px] font-bold text-rose-400 block mb-1 flex items-center gap-1.5">
+                  <AlertTriangle className="h-3.5 w-3.5" /> Risk Factor Assessment
+                </span>
+                <p className="leading-relaxed">{selectedCustomer.primaryRiskReason}</p>
+              </div>
+
+              {/* Recommended CFO Action */}
+              <div className="p-3.5 rounded-xl bg-cyan-950/20 border border-cyan-900/50 text-cyan-200">
+                <span className="text-[11px] font-bold text-cyan-400 block mb-1 flex items-center gap-1.5">
+                  <CheckCircle2 className="h-3.5 w-3.5" /> Recommended CFO Mitigation Action
+                </span>
+                <p className="leading-relaxed">
+                  Offer standard <strong>2/10 Net 30 prompt-pay incentives</strong> to pull forward cash collections and reduce DSO by 15 days. For disputed amounts, execute executive billing mediation.
+                </p>
+              </div>
+            </div>
+
+            <div className="mt-6 flex items-center justify-end gap-2 border-t border-slate-800 pt-4">
+              <button
+                onClick={() => setSelectedCustomer(null)}
+                className="rounded-lg border border-slate-700 bg-slate-800 px-4 py-2 text-xs font-semibold text-slate-300 hover:bg-slate-700 hover:text-white"
+              >
+                Dismiss
+              </button>
+              <button
+                onClick={() => {
+                  setSelectedCustomer(null);
+                }}
+                className="rounded-lg bg-cyan-600 px-4 py-2 text-xs font-semibold text-white hover:bg-cyan-500 shadow-md"
+              >
+                Generate Collection Notice
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Supplier Continuity Plan Modal */}
+      {selectedSupplier && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+          <div className="w-full max-w-xl rounded-2xl border border-slate-700 bg-slate-900 p-6 shadow-2xl animate-in fade-in duration-200">
+            <div className="flex items-start justify-between border-b border-slate-800 pb-4">
+              <div>
+                <span className="text-[10px] font-bold text-rose-400 uppercase tracking-wider">Vendor Dependency & Business Continuity</span>
+                <h3 className="text-lg font-bold text-white">{selectedSupplier.name}</h3>
+                <p className="text-xs text-slate-400">Category: {selectedSupplier.category} | Criticality: {selectedSupplier.criticality}</p>
+              </div>
+              <button
+                onClick={() => setSelectedSupplier(null)}
+                className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-800 hover:text-white"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <div className="mt-4 space-y-4 text-xs">
+              <div className="grid grid-cols-3 gap-2.5">
+                <div className="p-3 rounded-xl bg-slate-950/60 border border-slate-800">
+                  <span className="text-[10px] text-slate-400 block">Monthly Spend</span>
+                  <span className="text-sm font-mono font-bold text-white">${selectedSupplier.monthlySpend.toLocaleString()}/mo</span>
+                </div>
+                <div className="p-3 rounded-xl bg-slate-950/60 border border-slate-800">
+                  <span className="text-[10px] text-slate-400 block">Total OPEX Share</span>
+                  <span className="text-sm font-mono font-bold text-rose-400">{selectedSupplier.spendPercentage}%</span>
+                </div>
+                <div className="p-3 rounded-xl bg-slate-950/60 border border-slate-800">
+                  <span className="text-[10px] text-slate-400 block">Switching Lead Time</span>
+                  <span className="text-sm font-mono font-bold text-amber-400">{selectedSupplier.substitutabilityTimeWeeks} Weeks</span>
+                </div>
+              </div>
+
+              {/* Risk Factors */}
+              <div className="p-3.5 rounded-xl bg-rose-950/20 border border-rose-900/50 text-rose-200">
+                <span className="text-[11px] font-bold text-rose-400 block mb-1.5 flex items-center gap-1.5">
+                  <AlertTriangle className="h-3.5 w-3.5" /> Single Point of Failure Vectors
+                </span>
+                <ul className="space-y-1 list-disc list-inside text-[11px]">
+                  {selectedSupplier.riskFactors.map((rf, idx) => (
+                    <li key={idx}>{rf}</li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Failover Playbook */}
+              <div className="p-3.5 rounded-xl bg-slate-950/70 border border-slate-800 text-slate-300">
+                <span className="text-[11px] font-bold text-white block mb-1 flex items-center gap-1.5">
+                  <ShieldAlert className="h-3.5 w-3.5 text-cyan-400" /> Active Continuity Standby
+                </span>
+                <p className="leading-relaxed">
+                  Secondary warm-standby agreements active with dual cloud providers. In the event of an outage or contract breach, workloads auto-reroute to alternative multi-region infrastructure within 48 hours.
+                </p>
+              </div>
+            </div>
+
+            <div className="mt-6 flex items-center justify-end gap-2 border-t border-slate-800 pt-4">
+              <button
+                onClick={() => setSelectedSupplier(null)}
+                className="rounded-lg border border-slate-700 bg-slate-800 px-4 py-2 text-xs font-semibold text-slate-300 hover:bg-slate-700 hover:text-white"
+              >
+                Close
+              </button>
+              <button
+                onClick={() => {
+                  setSelectedSupplier(null);
+                }}
+                className="rounded-lg bg-rose-600 px-4 py-2 text-xs font-semibold text-white hover:bg-rose-500 shadow-md"
+              >
+                Execute SLA Review
+              </button>
             </div>
           </div>
         </div>

@@ -296,6 +296,14 @@ export const FraudDetectionView: React.FC<FraudDetectionViewProps> = ({
 
                     <td className="py-3 px-4 text-right" onClick={(e) => e.stopPropagation()}>
                       <div className="flex items-center justify-end gap-1.5">
+                        <button
+                          onClick={() => setSelectedTx(tx)}
+                          title="Open ML Forensic Audit Dossier"
+                          className="flex items-center gap-1 rounded bg-slate-800 hover:bg-slate-700 text-cyan-300 border border-slate-700 px-2 py-1 text-[11px] font-semibold transition-colors"
+                        >
+                          <FileText className="h-3.5 w-3.5 text-cyan-400" />
+                          <span>Audit</span>
+                        </button>
                         {tx.status !== 'cleared' && (
                           <button
                             onClick={() => onUpdateStatus(tx.id, 'cleared')}

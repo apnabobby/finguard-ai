@@ -10,7 +10,10 @@ import {
   Zap, 
   ArrowUpRight, 
   ArrowDownRight,
-  Sliders
+  Sliders,
+  X,
+  CheckCircle2,
+  Shield
 } from 'lucide-react';
 import { 
   ResponsiveContainer, 
@@ -44,6 +47,8 @@ export const CashFlowView: React.FC<CashFlowViewProps> = ({
   isLoading,
 }) => {
   const [chartMode, setChartMode] = useState<'balance' | 'inflow_outflow'>('balance');
+  const [selectedAlert, setSelectedAlert] = useState<{ message: string; date: string; impactAmount: number; type: string } | null>(null);
+  const [mitigationConfirmed, setMitigationConfirmed] = useState<boolean>(false);
 
   const points = cashFlow?.points || [];
 
@@ -318,16 +323,23 @@ export const CashFlowView: React.FC<CashFlowViewProps> = ({
 
       {/* Cash Flow Risk Alerts */}
       <div className="rounded-xl border border-slate-800 bg-slate-900/40 p-5">
-        <h2 className="text-sm font-bold text-white flex items-center gap-2 mb-3">
-          <AlertTriangle className="h-4 w-4 text-rose-400" />
-          Proactive Liquidity Risk Warnings & Recommended Interventions
-        </h2>
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-sm font-bold text-white flex items-center gap-2">
+            <AlertTriangle className="h-4 w-4 text-rose-400" />
+            Proactive Liquidity Risk Warnings & Recommended Interventions
+          </h2>
+          <span className="text-xs text-slate-400">Click any alert to inspect intervention plan</span>
+        </div>
 
         <div className="space-y-3">
           {(cashFlow?.riskAlerts || []).map((alert, idx) => (
             <div
               key={idx}
-              className={`flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 rounded-xl border ${
+              onClick={() => {
+                setSelectedAlert(alert);
+                setMitigationConfirmed(false);
+              }}
+              className={`flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 rounded-xl border cursor-pointer hover:border-slate-600 transition-all ${
                 alert.type === 'critical'
                   ? 'bg-rose-950/20 border-rose-900/50 text-rose-200'
                   : alert.type === 'warning'
@@ -343,7 +355,7 @@ export const CashFlowView: React.FC<CashFlowViewProps> = ({
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="text-xs font-bold text-white">{alert.message}</span>
+                    <span className="text-xs font-bold text-white hover:underline">{alert.message}</span>
                     <span className="text-[10px] font-mono opacity-75">{alert.date}</span>
                   </div>
                   <p className="text-xs opacity-80 mt-0.5">
@@ -352,15 +364,95 @@ export const CashFlowView: React.FC<CashFlowViewProps> = ({
                 </div>
               </div>
 
-              <div className="shrink-0 flex items-center gap-2">
-                <span className="text-[11px] rounded bg-slate-900/80 px-2.5 py-1 border border-slate-700 font-semibold text-slate-300">
-                  {alert.type === 'critical' ? 'Action Required' : alert.type === 'warning' ? 'Monitoring' : 'Positive Inflow'}
-                </span>
+              <div className="shrink-0 flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+                <button
+                  onClick={() => {
+                    setSelectedAlert(alert);
+                    setMitigationConfirmed(false);
+                  }}
+                  className="rounded-lg bg-slate-800 hover:bg-slate-700 px-3 py-1 text-[11px] font-semibold text-white border border-slate-700 transition-colors"
+                >
+                  Intervention Plan
+                </button>
               </div>
             </div>
           ))}
         </div>
       </div>
+
+      {/* Liquidity Intervention Modal */}
+      {selectedAlert && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+          <div className="w-full max-w-lg rounded-2xl border border-slate-700 bg-slate-900 p-6 shadow-2xl animate-in fade-in duration-200">
+            <div className="flex items-start justify-between border-b border-slate-800 pb-4">
+              <div className="flex items-center gap-2.5">
+                <div className="rounded-xl bg-amber-500/10 p-2 text-amber-400 border border-amber-500/20">
+                  <Shield className="h-5 w-5" />
+                </div>
+                <div>
+                  <span className="text-[10px] font-bold text-amber-400 uppercase tracking-wider">Treasury Liquidity Mitigation</span>
+                  <h3 className="text-sm font-bold text-white">{selectedAlert.message}</h3>
+                </div>
+              </div>
+              <button
+                onClick={() => setSelectedAlert(null)}
+                className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-800 hover:text-white"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <div className="mt-4 space-y-4 text-xs">
+              <div className="grid grid-cols-2 gap-3">
+                <div className="rounded-xl bg-slate-950/60 p-3 border border-slate-800">
+                  <span className="text-[10px] text-slate-400 block">Forecast Horizon Date</span>
+                  <span className="text-sm font-bold text-white font-mono">{selectedAlert.date}</span>
+                </div>
+                <div className="rounded-xl bg-slate-950/60 p-3 border border-slate-800">
+                  <span className="text-[10px] text-slate-400 block">Estimated Exposure</span>
+                  <span className="text-sm font-bold text-rose-400 font-mono">${selectedAlert.impactAmount.toLocaleString()} USD</span>
+                </div>
+              </div>
+
+              <div className="rounded-xl bg-slate-950/80 p-4 border border-slate-800 space-y-2">
+                <span className="text-[11px] font-bold text-slate-200 block">Prescribed AI-CFO Defensive Actions:</span>
+                <ul className="space-y-1.5 text-[11px] text-slate-400 list-disc list-inside">
+                  <li>Trigger rolling 14-day early payment incentive for tier-1 customer accounts (2% 10 Net 30).</li>
+                  <li>Defer discretionary hardware & GPU cluster procurement expansion until next quarter.</li>
+                  <li>Draw down pre-approved SVB/Mercury venture revolving credit line to safeguard minimum 45-day payroll runway.</li>
+                </ul>
+              </div>
+
+              {mitigationConfirmed ? (
+                <div className="rounded-xl bg-emerald-950/30 border border-emerald-800/60 p-3.5 flex items-center gap-2.5 text-emerald-300">
+                  <CheckCircle2 className="h-5 w-5 text-emerald-400 shrink-0" />
+                  <div>
+                    <span className="font-bold block">Mitigation Playbook Deployed</span>
+                    <span className="text-[11px] text-emerald-400/80">AP/AR treasury parameters re-indexed. Working capital buffer secured.</span>
+                  </div>
+                </div>
+              ) : null}
+            </div>
+
+            <div className="mt-6 flex items-center justify-end gap-2 border-t border-slate-800 pt-4">
+              <button
+                onClick={() => setSelectedAlert(null)}
+                className="rounded-lg border border-slate-700 bg-slate-800 px-4 py-2 text-xs font-semibold text-slate-300 hover:bg-slate-700 hover:text-white"
+              >
+                Close
+              </button>
+              {!mitigationConfirmed && (
+                <button
+                  onClick={() => setMitigationConfirmed(true)}
+                  className="rounded-lg bg-amber-600 px-4 py-2 text-xs font-semibold text-white hover:bg-amber-500 shadow-md transition-colors"
+                >
+                  Execute Treasury Mitigation
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

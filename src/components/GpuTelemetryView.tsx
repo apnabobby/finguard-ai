@@ -13,7 +13,9 @@ import {
   Play,
   Sliders,
   ShieldCheck,
-  AlertCircle
+  AlertCircle,
+  X,
+  Terminal
 } from 'lucide-react';
 import { GpuTelemetryData } from '../types';
 
@@ -34,6 +36,7 @@ export const GpuTelemetryView: React.FC<GpuTelemetryViewProps> = ({
     throughputTps: number;
     mode: 'rocm' | 'cpu';
   } | null>(null);
+  const [selectedWorkload, setSelectedWorkload] = useState<any | null>(null);
 
   if (!gpuData) {
     return <div className="p-8 text-center text-slate-500">Loading GPU telemetry...</div>;
@@ -336,10 +339,14 @@ export const GpuTelemetryView: React.FC<GpuTelemetryViewProps> = ({
 
             <div className="space-y-2.5">
               {gpuData.activeWorkloads.map((job) => (
-                <div key={job.id} className="p-3 rounded-lg bg-slate-950/70 border border-slate-800 text-xs">
+                <div 
+                  key={job.id} 
+                  onClick={() => setSelectedWorkload(job)}
+                  className="p-3 rounded-lg bg-slate-950/70 border border-slate-800 text-xs cursor-pointer hover:border-cyan-500/60 transition-all"
+                >
                   <div className="flex items-start justify-between">
                     <div>
-                      <span className="font-mono font-bold text-white block">{job.jobName}</span>
+                      <span className="font-mono font-bold text-white block hover:text-cyan-400 transition-colors">{job.jobName}</span>
                       <span className="text-[10px] text-cyan-400 font-medium">{job.queueType}</span>
                     </div>
                     <span className={`rounded px-1.5 py-0.5 text-[9px] font-bold uppercase ${
@@ -370,6 +377,77 @@ export const GpuTelemetryView: React.FC<GpuTelemetryViewProps> = ({
           </div>
         </div>
       </div>
+
+      {/* Kernel Dispatch Inspector Modal */}
+      {selectedWorkload && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+          <div className="w-full max-w-lg rounded-2xl border border-slate-700 bg-slate-900 p-6 shadow-2xl animate-in fade-in duration-200">
+            <div className="flex items-start justify-between border-b border-slate-800 pb-4">
+              <div className="flex items-center gap-2.5">
+                <div className="rounded-xl bg-cyan-500/10 p-2 text-cyan-400 border border-cyan-500/20">
+                  <Terminal className="h-5 w-5" />
+                </div>
+                <div>
+                  <span className="text-[10px] font-bold text-cyan-400 uppercase tracking-wider">HIP Kernel Telemetry</span>
+                  <h3 className="text-sm font-bold text-white font-mono">{selectedWorkload.jobName}</h3>
+                </div>
+              </div>
+              <button
+                onClick={() => setSelectedWorkload(null)}
+                className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-800 hover:text-white"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <div className="mt-4 space-y-4 text-xs font-mono">
+              <div className="grid grid-cols-2 gap-3">
+                <div className="rounded-xl bg-slate-950/60 p-3 border border-slate-800">
+                  <span className="text-[10px] text-slate-400 block font-sans">Queue Identifier</span>
+                  <span className="text-xs font-bold text-white">{selectedWorkload.queueType}</span>
+                </div>
+                <div className="rounded-xl bg-slate-950/60 p-3 border border-slate-800">
+                  <span className="text-[10px] text-slate-400 block font-sans">Execution Status</span>
+                  <span className="text-xs font-bold text-emerald-400">{selectedWorkload.status}</span>
+                </div>
+                <div className="rounded-xl bg-slate-950/60 p-3 border border-slate-800">
+                  <span className="text-[10px] text-slate-400 block font-sans">Observed Latency</span>
+                  <span className="text-xs font-bold text-rose-400">{selectedWorkload.latencyMs} ms</span>
+                </div>
+                <div className="rounded-xl bg-slate-950/60 p-3 border border-slate-800">
+                  <span className="text-[10px] text-slate-400 block font-sans">Throughput Velocity</span>
+                  <span className="text-xs font-bold text-cyan-400">{selectedWorkload.throughputTps.toLocaleString()} tps</span>
+                </div>
+              </div>
+
+              <div className="rounded-xl bg-slate-950/80 p-3.5 border border-slate-800 text-[11px] text-slate-300 font-mono">
+                <div className="text-slate-500 mb-1">// ROCm HIP Kernel Compilation Context</div>
+                <div className="text-slate-300">target: gfx942 (CDNA3)</div>
+                <div className="text-slate-300">workgroup_size: [256, 1, 1]</div>
+                <div className="text-slate-300">shared_memory_bytes: 49152</div>
+                <div className="text-emerald-400">stream_priority: HIP_STREAM_HIGH_PRIORITY</div>
+              </div>
+            </div>
+
+            <div className="mt-6 flex items-center justify-end gap-2 border-t border-slate-800 pt-4">
+              <button
+                onClick={() => setSelectedWorkload(null)}
+                className="rounded-lg border border-slate-700 bg-slate-800 px-4 py-2 text-xs font-semibold text-slate-300 hover:bg-slate-700 hover:text-white font-sans"
+              >
+                Close
+              </button>
+              <button
+                onClick={() => {
+                  setSelectedWorkload(null);
+                }}
+                className="rounded-lg bg-cyan-600 px-4 py-2 text-xs font-semibold text-white hover:bg-cyan-500 shadow-md font-sans"
+              >
+                Prioritize Stream
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

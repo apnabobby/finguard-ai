@@ -99,9 +99,12 @@ export const OverviewView: React.FC<OverviewViewProps> = ({
       {/* KPI Cards Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Card 1: Health Score */}
-        <div className="rounded-xl border border-slate-800/80 bg-slate-900/50 p-4.5 hover:border-slate-700 transition-all">
+        <div 
+          onClick={() => setActiveTab('business-risk')}
+          className="rounded-xl border border-slate-800/80 bg-slate-900/50 p-4.5 hover:border-emerald-500/50 hover:bg-slate-850 cursor-pointer transition-all group"
+        >
           <div className="flex items-center justify-between text-slate-400 text-xs font-medium mb-2">
-            <span>Financial Health Index</span>
+            <span className="group-hover:text-emerald-300 transition-colors">Financial Health Index</span>
             <ShieldCheck className="h-4 w-4 text-emerald-400" />
           </div>
           <div className="flex items-baseline gap-2 mb-1">
@@ -116,15 +119,19 @@ export const OverviewView: React.FC<OverviewViewProps> = ({
           <div className="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden my-2">
             <div className="bg-gradient-to-r from-cyan-500 to-emerald-400 h-full rounded-full" style={{ width: '84%' }} />
           </div>
-          <p className="text-[11px] text-slate-400">
-            Rating: <span className="text-emerald-300 font-semibold">{overviewData?.healthRating || 'Optimal Resilience'}</span>
-          </p>
+          <div className="flex items-center justify-between text-[11px] text-slate-400">
+            <span>Rating: <strong className="text-emerald-300">{overviewData?.healthRating || 'Optimal Resilience'}</strong></span>
+            <span className="text-emerald-400 text-[10px] group-hover:underline flex items-center">Open Risk <ArrowUpRight className="h-2.5 w-2.5 ml-0.5" /></span>
+          </div>
         </div>
 
         {/* Card 2: Liquid Treasury & Runway */}
-        <div className="rounded-xl border border-slate-800/80 bg-slate-900/50 p-4.5 hover:border-slate-700 transition-all">
+        <div 
+          onClick={() => setActiveTab('cashflow')}
+          className="rounded-xl border border-slate-800/80 bg-slate-900/50 p-4.5 hover:border-cyan-500/50 hover:bg-slate-850 cursor-pointer transition-all group"
+        >
           <div className="flex items-center justify-between text-slate-400 text-xs font-medium mb-2">
-            <span>Liquid Treasury Balance</span>
+            <span className="group-hover:text-cyan-300 transition-colors">Liquid Treasury Balance</span>
             <Wallet className="h-4 w-4 text-cyan-400" />
           </div>
           <div className="flex items-baseline gap-2 mb-1">
@@ -137,19 +144,19 @@ export const OverviewView: React.FC<OverviewViewProps> = ({
           </div>
           <div className="flex items-center justify-between text-[11px] text-slate-400 mt-3 pt-2 border-t border-slate-800/60">
             <span>Net Burn: <strong className="text-slate-200 font-mono">${(overviewData?.monthlyNetBurn || 42800).toLocaleString()}/mo</strong></span>
-            <button 
-              onClick={() => setActiveTab('cashflow')}
-              className="text-cyan-400 hover:underline flex items-center gap-0.5"
-            >
+            <span className="text-cyan-400 group-hover:underline flex items-center gap-0.5">
               Forecast <ArrowUpRight className="h-3 w-3" />
-            </button>
+            </span>
           </div>
         </div>
 
         {/* Card 3: Fraud & Anomalies */}
-        <div className="rounded-xl border border-slate-800/80 bg-slate-900/50 p-4.5 hover:border-slate-700 transition-all">
+        <div 
+          onClick={() => setActiveTab('fraud')}
+          className="rounded-xl border border-slate-800/80 bg-slate-900/50 p-4.5 hover:border-rose-500/50 hover:bg-slate-850 cursor-pointer transition-all group"
+        >
           <div className="flex items-center justify-between text-slate-400 text-xs font-medium mb-2">
-            <span>Active Fraud Vector</span>
+            <span className="group-hover:text-rose-300 transition-colors">Active Fraud Vector</span>
             <ShieldAlert className="h-4 w-4 text-rose-400" />
           </div>
           <div className="flex items-baseline gap-2 mb-1">
@@ -163,19 +170,19 @@ export const OverviewView: React.FC<OverviewViewProps> = ({
           </div>
           <div className="flex items-center justify-between text-[11px] text-slate-400 mt-3 pt-2 border-t border-slate-800/60">
             <span>Volume: <strong className="text-rose-300 font-mono">${flaggedTransactions.reduce((a, b) => a + b.amount, 0).toLocaleString()}</strong></span>
-            <button 
-              onClick={() => setActiveTab('fraud')}
-              className="text-rose-400 hover:underline flex items-center gap-0.5"
-            >
+            <span className="text-rose-400 group-hover:underline flex items-center gap-0.5">
               Review <ArrowUpRight className="h-3 w-3" />
-            </button>
+            </span>
           </div>
         </div>
 
         {/* Card 4: GPU Acceleration */}
-        <div className="rounded-xl border border-slate-800/80 bg-slate-900/50 p-4.5 hover:border-slate-700 transition-all">
+        <div 
+          onClick={() => setActiveTab('gpu')}
+          className="rounded-xl border border-slate-800/80 bg-slate-900/50 p-4.5 hover:border-rose-500/50 hover:bg-slate-850 cursor-pointer transition-all group"
+        >
           <div className="flex items-center justify-between text-slate-400 text-xs font-medium mb-2">
-            <span>AMD ROCm™ Engine</span>
+            <span className="group-hover:text-rose-300 transition-colors">AMD ROCm™ Engine</span>
             <Cpu className="h-4 w-4 text-rose-400" />
           </div>
           <div className="flex items-baseline gap-2 mb-1">
@@ -191,12 +198,9 @@ export const OverviewView: React.FC<OverviewViewProps> = ({
             <span className="truncate max-w-[170px] text-slate-300">
               {gpuData?.mode === 'rocm' ? 'Instinct MI300X (192GB)' : 'Dual Xeon Fallback'}
             </span>
-            <button 
-              onClick={() => setActiveTab('gpu')}
-              className="text-cyan-400 hover:underline flex items-center gap-0.5"
-            >
+            <span className="text-cyan-400 group-hover:underline flex items-center gap-0.5">
               Telemetry <ArrowUpRight className="h-3 w-3" />
-            </button>
+            </span>
           </div>
         </div>
       </div>
